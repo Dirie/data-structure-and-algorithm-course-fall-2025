@@ -1,163 +1,212 @@
-#include <bits/stdc++.h>
 #include <iostream>
 
 using namespace std;
 
-// A linked list node
-class Node {
-public:
-	int data;
-	Node* next;
-	Node* prev;
+struct Node {
+    int data;
+    Node* prev;
+    Node* next;
+    Node(int d) : data(d), prev(nullptr), next(nullptr) {}
 };
 
-/* Given a reference (pointer to pointer)
-to the head of a list and an int, inserts a new node on the
-front of the list. */
 
-void push(Node** head_ref, int new_data)
-{
-	/* 1. allocate node */
-	Node* new_node = new Node();
-
-	/* 2. put in the data */
-	new_node->data = new_data;
-
-	/* 3. Make next of new node as head
-	and previous as NULL */
-	new_node->next = (*head_ref);
-	new_node->prev = NULL;
-
-	/* 4. change prev of head node to new node */
-	if ((*head_ref) != NULL)
-		(*head_ref)->prev = new_node;
-
-	/* 5. move the head to point to the new node */
-	(*head_ref) = new_node;
+//adds a new value to the left of the list
+Node* MakeListLeft(int value, Node* rest) {
+    Node* newNode = new Node(value);
+    if (rest != nullptr) {
+        newNode->next = rest;
+        rest->prev = newNode;
+    }
+    return newNode;
 }
 
-/* Given a node as prev_node, insert
-a new node after the given node */
-void insertAfter(Node* prev_node, int new_data)
-{
-	/*1. check if the given prev_node is NULL */
-	if (prev_node == NULL) {
-		cout << "the given previous node cannot be NULL";
-		return;
-	}
 
-	/* 2. allocate new node */
-	Node* new_node = new Node();
+//adds a new value to the right of the list
+Node* MakeListRight(int value, Node* rest) {
+    Node* newNode = new Node(value);
+    if (rest == nullptr)
+        return newNode;
 
-	/* 3. put in the data */
-	new_node->data = new_data;
+    Node* curr = rest;
+    while (curr->next != nullptr)
+        curr = curr->next;
 
-	/* 4. Make next of new node as next of prev_node */
-	new_node->next = prev_node->next;
-
-	/* 5. Make the next of prev_node as new_node */
-	prev_node->next = new_node;
-
-	/* 6. Make prev_node as previous of new_node */
-	new_node->prev = prev_node;
-
-	/* 7. Change previous of new_node's next node */
-	if (new_node->next != NULL)
-		new_node->next->prev = new_node;
+    curr->next = newNode;
+    newNode->prev = curr;
+    return rest;
 }
 
-/* Given a reference (pointer to pointer) to the head
-of a DLL and an int, appends a new node at the end */
-void append(Node** head_ref, int new_data)
-{
-	/* 1. allocate node */
-	Node* new_node = new Node();
 
-	Node* last = *head_ref; /* used in step 5*/
-
-	/* 2. put in the data */
-	new_node->data = new_data;
-
-	/* 3. This new node is going to be the last node, so
-		make next of it as NULL*/
-	new_node->next = NULL;
-
-	/* 4. If the Linked List is empty, then make the new
-		node as head */
-	if (*head_ref == NULL) {
-		new_node->prev = NULL;
-		*head_ref = new_node;
-		return;
-	}
-
-	/* 5. Else traverse till the last node */
-	while (last->next != NULL)
-		last = last->next;
-
-	/* 6. Change the next of last node */
-	last->next = new_node;
-
-	/* 7. Make last node as previous of new node */
-	new_node->prev = last;
-
-	return;
+//checks if the list is empty.
+bool isEmpty(Node* list) {
+    return list == nullptr;
 }
 
-// This function prints contents of
-// linked list starting from the given node
-void printList(Node* node)
-{
-    cout<<"\nN.B: It displays the doubled linked list in two ways, forward and reverse direction:"<<endl;
-	Node* last;
-	cout << "\nTraversal in forward direction \n";
-	while (node != NULL) {
-		cout << node->data << " ";
-		last = node;
-		node = node->next;
-	}
-
-	cout << "\nTraversal in reverse direction \n";
-	while (last != NULL) {
-		cout << last->data << " ";
-		last = last->prev;
-	}
+//the left most element of list
+int firstLeft(Node* list) {
+    if (isEmpty(list)) {
+        throw runtime_error("List is empty!");
+    }
+    return list->data;
 }
 
-// Driver code
-int main()
-{
-	/* Start with the empty list */
-	Node* head = NULL;
+//returns the list excluding the left element
 
-	// Insert 6. So linked list becomes 6->NULL
-	append(&head, 6);
-
-	// Insert 7 at the beginning. So
-	// linked list becomes 7->6->NULL
-	push(&head, 7);
-
-	// Insert 1 at the beginning. So
-	// linked list becomes 1->7->6->NULL
-	push(&head, 1);
-
-	// Insert 4 at the end. So linked
-	// list becomes 1->7->6->4->NULL
-	append(&head, 4);
-
-	// Insert 8, after 7. So linked
-	// list becomes 1->7->8->6->4->NULL
-	insertAfter(head->next, 8);
-
-	// Insert 9, after 8. So linked
-	// list becomes 1->7->9->8->6->4->NULL
-    insertAfter(head->next, 9);
-
-
-
-	cout << "Created DLL is: ";
-	printList(head);
-
-	return 0;
+Node* restLeft(Node* list) {
+    if (isEmpty(list)) return nullptr;
+    Node* rest = list->next;
+    if (rest != nullptr) rest->prev = nullptr;
+    delete list;
+    return rest;
 }
 
-// This is code is contributed by rathbhupendra
+//return the right most element of list
+
+int firstRight(Node* list) {
+    if (isEmpty(list)) {
+        throw runtime_error("List is empty!");
+    }
+    Node* curr = list;
+    while (curr->next != nullptr)
+        curr = curr->next;
+    return curr->data;
+}
+
+//return the list excluding the right element
+Node* restRight(Node* list) {
+    if (isEmpty(list)) return nullptr;
+
+    Node* curr = list;
+    while (curr->next != nullptr)
+        curr = curr->next;
+
+    if (curr->prev != nullptr) {
+        curr->prev->next = nullptr;
+    } else {
+        // only one element
+        list = nullptr;
+    }
+
+    delete curr;
+    return list;
+}
+
+//prints out the list on the screen
+
+void printList(Node* head) {
+    Node* curr = head;
+    while (curr) {
+        cout << curr->data;
+        if (curr->next)
+            cout << " <-> ";
+        curr = curr->next;
+    }
+    cout <<endl;
+}
+
+
+
+// Returns the number of nodes in the list
+int getCount(Node* head) {
+    int count = 0;
+    Node* curr = head;
+    while (curr) {
+        count++;
+        curr = curr->next;
+    }
+    return count;
+}
+
+// Deletes the first occurrence of a node with the given value
+Node* deleteItem(Node* head, int value) {
+    Node* curr = head;
+    while (curr) {
+        if (curr->data == value) {
+            if (curr->prev)
+                curr->prev->next = curr->next;
+            else
+                head = curr->next; // head deleted
+
+            if (curr->next)
+                curr->next->prev = curr->prev;
+
+            delete curr;
+            break;
+        }
+        curr = curr->next;
+    }
+    return head;
+}
+
+// Deletes entire list to free memory
+void deleteList(Node* head) {
+    while (head) {
+        Node* next = head->next;
+        delete head;
+        head = next;
+    }
+}
+
+int main() {
+
+    Node* list = nullptr;
+
+    cout << "Is Empty: " << (isEmpty(list) ? "Yes" : "No") <<endl;
+
+
+    list = MakeListLeft(3,
+        MakeListLeft(1,
+            MakeListLeft(4,
+                MakeListLeft(2,
+                    MakeListLeft(5, nullptr)))));
+    printList(list);
+
+    Node* list1 = MakeListRight(5,
+        MakeListRight(2,
+            MakeListRight(4,
+                MakeListRight(1,
+                    MakeListRight(3, nullptr)))));
+                    
+    printList(list1);
+
+    Node* list2 = MakeListLeft(3,
+        MakeListLeft(1,
+            MakeListRight(5,
+                MakeListRight(2,
+                    MakeListLeft(4, nullptr)))));
+
+    printList(list2); 
+
+    //these are the selectors
+
+    cout<<"First Left: "<<firstLeft(list)<<endl;
+    list = restLeft(list);
+    cout<<"Rest left of the list : ";
+    printList(list);
+
+    //call first right function
+    cout<<"First Right : "<<firstRight(list)<<endl;
+
+    //call the rest right function.
+    list = restRight(list);
+    cout<<"Rest right of the list : ";
+    printList(list);
+
+    cout << "Is Empty: " << (isEmpty(list) ? "Yes" : "No") <<endl;
+
+    //get the number of elements in the list
+    cout << "Length: "<<getCount(list) <<endl;
+
+    //deleting an element of the array.
+    cout<<"Deleting value 4..."<<endl;
+    list = deleteItem(list, 4);
+    printList(list);
+
+    //deleting the entire list
+    cout<<"Deleting list from memory..."<<endl;
+    deleteList(list);
+
+
+
+    return 0;
+}
